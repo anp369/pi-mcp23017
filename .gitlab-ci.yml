@@ -1,0 +1,27 @@
+image: python:3.6
+
+before_script:
+  - curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+  - source $HOME/.poetry/env
+  - poetry install
+
+stages:
+  - build
+  - upload
+
+build:
+  stage: build
+  script:
+    - poetry build
+  artifacts:
+    paths:
+      - dist
+
+upload:
+  stage: upload
+  dependencies:
+    - build
+  script:
+    - poetry publish -n -u __token__ -p "$CI_PYPI_TOKEN"
+  only:
+    - /^release_.+/
